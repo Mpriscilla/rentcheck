@@ -224,6 +224,27 @@ describe('listing collaboration server actions', () => {
     )
   })
 
+  it('saves a vote with an empty optional comment', async () => {
+    const { context, query, create } = makeContext('roommate')
+    query.mockResolvedValue({ success: true, data: { records: [], count: 0 } })
+    context.params = { listingId: 'listing-1', choice: 'Good fit', comment: '' }
+
+    const result = await listingCollaborationActions.castListingVote(context)
+
+    expect(result).toEqual({ success: true, data: { choice: 'Good fit', comment: '' } })
+    expect(create).toHaveBeenCalledWith(
+      'listing_votes',
+      {
+        listingId: 'listing-1',
+        userId: 'roommate',
+        choice: 'Good fit',
+        comment: '',
+        collaborators: ['creator', 'roommate'],
+      },
+      'listing-1:roommate',
+    )
+  })
+
   it('removes a collaborator vote as part of revoking their access', async () => {
     const { context, query, remove, update } = makeContext()
     query.mockResolvedValue({

@@ -1,10 +1,8 @@
 /*
  * Theme overrides — applied via <html data-theme="<id>">.
  *
- * Default values live in `styles.css` (@theme block, slate — a neutral
- * placeholder, not a design choice). Every app should define its OWN theme
- * before first deploy: copy the example block below, rename the selector,
- * and set colors that fit the product. Shape comes from `--radius`.
+ * RentCheck uses a warm, light sage theme. The paper example remains available
+ * as an alternate. Shape comes from `--radius`.
  *
  * To add a theme:
  *   1. Add a `[data-theme="my-id"] { ... }` block overriding the shadcn
@@ -16,8 +14,33 @@
  *   4. Switch to it via `data-theme` on <html> in index.html.
  */
 
-/* Paper — light example theme; shows the full token contract incl.
- * `color-scheme: light`. Replace or delete it once the app has its own. */
+[data-theme="rentcheck"] {
+  color-scheme: light;
+  --color-background: #f6f7f2;
+  --color-foreground: #17251e;
+  --color-card: #ffffff;
+  --color-card-foreground: #17251e;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #17251e;
+  --color-primary: #205b46;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #e5eee7;
+  --color-secondary-foreground: #19382a;
+  --color-muted: #edf1ec;
+  --color-muted-foreground: #52645a;
+  --color-accent: #deebe1;
+  --color-accent-foreground: #19382a;
+  --color-destructive: #b42318;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #d3ded5;
+  --color-input: #c4d2c8;
+  --color-ring: #176b53;
+  --radius: 0.75rem;
+  --color-shell: #f0f3ed;
+  --color-shell-panel: #ffffff;
+}
+
+/* Alternate neutral light theme. */
 [data-theme="paper"] {
   color-scheme: light;
   --color-background: #ffffff;

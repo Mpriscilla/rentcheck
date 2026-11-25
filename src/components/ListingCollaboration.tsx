@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth, useQuery, useUserLookup } from 'deepspace'
 import { Button, Textarea } from '@/components/ui'
 import { callListingAction } from '@/lib/listing-actions'
@@ -15,7 +15,7 @@ interface ListingVote {
   listingId: string
   userId: string
   choice: VoteChoice
-  comment: string
+  comment?: string
   collaborators: string[]
 }
 
@@ -41,10 +41,12 @@ export default function ListingCollaboration({
   const [voteError, setVoteError] = useState('')
   const [inviteActive, setInviteActive] = useState(false)
   const [inviteUrl, setInviteUrl] = useState('')
+  const [inviteCopied, setInviteCopied] = useState(false)
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteError, setInviteError] = useState('')
   const [removingId, setRemovingId] = useState('')
   const [collaboratorError, setCollaboratorError] = useState('')
+  const copyResetTimeout = useRef<number | null>(null)
   const isCreator = userId === creatorId
   const participants = useMemo(
     () => [...new Set([creatorId, ...collaborators])],
@@ -71,8 +73,12 @@ export default function ListingCollaboration({
   useEffect(() => {
     if (!currentVote) return
     setChoice(currentVote.data.choice)
-    setComment(currentVote.data.comment)
+    setComment(currentVote.data.comment ?? '')
   }, [currentVote?.data.choice, currentVote?.data.comment])
+
+  useEffect(() => () => {
+    if (copyResetTimeout.current !== null) window.clearTimeout(copyResetTimeout.current)
+  }, [])
 
   const decision = votes.some((vote) => vote.data.choice === 'Reject')
     ? 'Pass'
@@ -88,8 +94,8 @@ export default function ListingCollaboration({
     setVoteError('')
     try {
       await callListingAction('castListingVote', { listingId, choice, comment })
-    } catch (error) {
-      setVoteError(error instanceof Error ? error.message : 'Your vote could not be saved.')
+    } catch {
+      setVoteError("Couldn't save your vote. Try again.")
     } finally {
       setSavingVote(false)
     }
@@ -101,6 +107,7 @@ export default function ListingCollaboration({
     try {
       const { token } = await callListingAction<{ token: string }>('createListingInvite', { listingId })
       setInviteUrl(`${window.location.origin}/listings/invite/${token}`)
+      setInviteCopied(false)
       setInviteActive(true)
     } catch {
       setInviteError('The invite link could not be created. Please try again.')
@@ -116,6 +123,7 @@ export default function ListingCollaboration({
       await callListingAction('revokeListingInvite', { listingId })
       setInviteActive(false)
       setInviteUrl('')
+      setInviteCopied(false)
     } catch {
       setInviteError('The invite link could not be turned off. Please try again.')
     } finally {
@@ -139,6 +147,12 @@ export default function ListingCollaboration({
     try {
       await navigator.clipboard.writeText(inviteUrl)
       setInviteError('')
+      setInviteCopied(true)
+      if (copyResetTimeout.current !== null) window.clearTimeout(copyResetTimeout.current)
+      copyResetTimeout.current = window.setTimeout(() => {
+        setInviteCopied(false)
+        copyResetTimeout.current = null
+      }, 2000)
     } catch {
       setInviteError('Copy was unavailable. Select and copy the invite link.')
     }
@@ -201,7 +215,7 @@ export default function ListingCollaboration({
                 value={inviteUrl}
                 className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm"
               />
-              <Button variant="outline" onClick={copyInvite}>Copy</Button>
+              <Button variant="outline" onClick={copyInvite}>{inviteCopied ? 'Copied!' : 'Copy'}</Button>
             </div>
           )}
           {inviteError && <p role="alert" className="mt-3 text-sm text-destructive">{inviteError}</p>}

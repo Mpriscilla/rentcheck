@@ -20,7 +20,7 @@ export async function callListingAction<TData extends Record<string, unknown>>(
   const body: unknown = await response.json()
   if (!isRecord(body)) throw new Error('The server returned an invalid response.')
   if (body.success !== true) {
-    throw new Error(typeof body.error === 'string' ? body.error : 'The request could not be completed.')
+    throw new Error('The request could not be completed. Please try again.')
   }
   if (!isRecord(body.data)) throw new Error('The server returned an invalid response.')
   return body.data as TData

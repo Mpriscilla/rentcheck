@@ -11,7 +11,7 @@ export const listingVotesSchema: CollectionSchema = {
       interpretation: { kind: 'select', options: ['Good fit', 'Needs questions', 'Reject'] },
       required: true,
     },
-    { name: 'comment', storage: 'text', interpretation: 'plain', required: true },
+    { name: 'comment', storage: 'text', interpretation: 'plain' },
     { name: 'collaborators', storage: 'text', interpretation: { kind: 'json' }, required: true },
   ],
   uniqueOn: ['listingId', 'userId'],

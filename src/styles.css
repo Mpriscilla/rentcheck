@@ -8,8 +8,8 @@
 /*
  * Theming — pure shadcn/ui CSS variables with [data-theme] selectors.
  *
- * The @theme block below holds the default theme (slate). All other themes
- * live in `themes.css` as `[data-theme="<id>"]` override blocks. Switching
+ * The @theme block below holds the slate fallback. App themes live in
+ * `themes.css` as `[data-theme="<id>"]` override blocks. Switching
  * themes = changing the data-theme attribute on <html> in index.html. No
  * JS, no FOUC.
  *
@@ -152,8 +152,7 @@
  */
 @layer base {
   html {
-    /* Default to dark for native form controls (calendar icons, scrollbars).
-     * Light themes opt into `color-scheme: light` in themes.css. */
+    /* Slate is the fallback; RentCheck and Paper opt into light controls. */
     color-scheme: dark;
   }
 
@@ -195,6 +194,14 @@
   ::selection {
     background-color: var(--color-primary);
     color: var(--color-primary-foreground);
+  }
+
+  a:focus-visible,
+  button:not([data-slot="button"]):focus-visible,
+  input[readonly]:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
   }
 
   /*

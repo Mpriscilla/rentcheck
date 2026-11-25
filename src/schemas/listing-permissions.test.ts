@@ -40,4 +40,9 @@ describe('listing collaboration permissions', () => {
     expect(canCreate(listingInvitesSchema, 'member')).toBe(false)
     expect(listingVotesSchema.uniqueOn).toEqual(['listingId', 'userId'])
   })
+
+  it('allows votes without a comment', () => {
+    const commentColumn = listingVotesSchema.columns.find((column) => column.name === 'comment')
+    expect(commentColumn?.required).not.toBe(true)
+  })
 })
