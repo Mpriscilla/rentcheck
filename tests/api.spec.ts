@@ -15,6 +15,17 @@ test.describe('API tests', () => {
     expect(await res.json()).toMatchObject({ error: 'Unauthorized' })
   })
 
+  test('listing collaboration actions require authentication', async ({ request }) => {
+    for (const action of ['createListingInvite', 'acceptListingInvite', 'castListingVote']) {
+      const res = await request.post(`/api/actions/${action}`, {
+        data: { listingId: 'listing-1', token: 'a'.repeat(64), choice: 'Good fit' },
+      })
+
+      expect(res.status()).toBe(401)
+      expect(await res.json()).toMatchObject({ error: 'Unauthorized' })
+    }
+  })
+
   test('WebSocket endpoint exists', async ({ page }) => {
     // /home is a dynamic page (under src/pages/(app)/), so mounting it boots
     // the providers and auto-connects the records WebSocket. The static

@@ -118,8 +118,19 @@ describe('summarizeListing action', () => {
   })
 
   it('refuses generation for anyone other than the listing creator', async () => {
-    const { context } = makeContext({ createdBy: 'someone-else' })
+    const { context } = makeContext({ createdBy: 'creator' })
     context.userId = 'caller'
+    const listing = context.tools.get
+    listing.mockResolvedValue({
+      success: true,
+      data: {
+        record: {
+          recordId: 'listing-1',
+          createdBy: 'creator',
+          data: { listingText: 'Rent is $2,400 per month.', collaborators: ['caller'] },
+        },
+      },
+    })
 
     const result = await actions.summarizeListing(context)
 

@@ -11,7 +11,7 @@ export interface ListingFormData {
   listingText: string
   rentAmount?: number | null
   address?: string
-  collaborators: string[]
+  collaborators?: string[]
   aiSummary?: ListingSummary | null
 }
 
@@ -46,7 +46,6 @@ export default function ListingForm({ initialData, listingId }: ListingFormProps
     const data: ListingFormData = {
       title: title.trim(),
       listingText: listingText.trim(),
-      collaborators: initialData?.collaborators ?? [],
     }
     if (listingId) {
       data.rentAmount = rentAmount.trim() ? Number(rentAmount) : null

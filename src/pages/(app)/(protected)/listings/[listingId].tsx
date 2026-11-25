@@ -1,9 +1,11 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { getAuthToken, useAuth, useMutations, useQuery } from 'deepspace'
+import { getAuthToken, useAuth, useQuery } from 'deepspace'
 import { ArrowLeft, MapPin, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { Button, ConfirmModal, EmptyState } from '@/components/ui'
 import type { ListingFormData } from '@/components/ListingForm'
+import ListingCollaboration from '@/components/ListingCollaboration'
+import { callListingAction } from '@/lib/listing-actions'
 import type { ListingSummary } from '@/lib/listing-summary'
 
 const SUMMARY_FAILURE_MESSAGE =
@@ -14,7 +16,6 @@ export default function ListingDetailPage() {
   const navigate = useNavigate()
   const { userId } = useAuth()
   const { records, status } = useQuery<ListingFormData>('listings')
-  const { ready, removeConfirmed } = useMutations<ListingFormData>('listings')
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
@@ -105,7 +106,7 @@ export default function ListingDetailPage() {
     setDeleteError('')
     setDeleting(true)
     try {
-      await removeConfirmed(listing.recordId)
+      await callListingAction('deleteListing', { listingId: listing.recordId })
       navigate('/listings')
     } catch (writeError) {
       setDeleteError(
@@ -213,6 +214,12 @@ export default function ListingDetailPage() {
         </section>
       )}
 
+      <ListingCollaboration
+        listingId={recordId}
+        creatorId={listing.createdBy}
+        collaborators={listing.data.collaborators ?? []}
+      />
+
       {isCreator && (
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
@@ -222,7 +229,7 @@ export default function ListingDetailPage() {
             <Pencil className="size-4" aria-hidden />
             Edit listing
           </Link>
-          <Button variant="destructive" disabled={!ready} onClick={() => setConfirmingDelete(true)}>
+          <Button variant="destructive" disabled={deleting} onClick={() => setConfirmingDelete(true)}>
             <Trash2 className="size-4" aria-hidden />
             Delete listing
           </Button>

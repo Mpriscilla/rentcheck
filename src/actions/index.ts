@@ -3,6 +3,7 @@ import { generateText, Output } from 'ai'
 import { createDeepSpaceAI, loggableError } from 'deepspace/worker'
 import { listingSummarySchema } from '../lib/listing-summary.js'
 import type { Env } from '../../worker'
+import { listingCollaborationActions } from './listing-collaboration.js'
 
 const MAX_LISTING_TEXT_LENGTH = 12_000
 const SUMMARY_FAILED = 'SUMMARY_FAILED'
@@ -88,4 +89,5 @@ const summarizeListing: ActionHandler<Env> = async ({
 
 export const actions: Record<string, ActionHandler<Env>> = {
   summarizeListing,
+  ...listingCollaborationActions,
 }

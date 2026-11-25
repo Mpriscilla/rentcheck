@@ -63,6 +63,11 @@ test.describe('Smoke tests', () => {
     await expect(page.getByTestId('nav-user-name')).toHaveCount(0)
   })
 
+  test('signed-out invite visitor is asked to sign in', async ({ page }) => {
+    await page.goto(`/listings/invite/${'a'.repeat(64)}`)
+    await expect(page.getByRole('heading', { name: 'Sign in to continue' })).toBeVisible()
+  })
+
   test('unknown route shows 404', async ({ page }) => {
     await page.goto('/nonexistent-page-xyz')
     await waitForApp(page)

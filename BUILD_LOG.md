@@ -48,3 +48,11 @@
 - Bug 2: real error was "Unterminated string in JSON at position 615." The output token limit was too low (from my "keep it cheap" instruction), so the AI's answer was cut off. Fixed by raising the limit and capping list lengths.
 - Tested: structured summary, flags cash deposit and non-refundable fee, no invented facts, legal note, persists on refresh, clears on edit, stranger still blocked.
 - Note: AI used only the listing text ($1,850) even when the rent field said $1,900. It doesn't guess.
+
+## Step 8: Roommates + live voting (Copilot)
+- Reviewed Copilot's plan: invite tokens stored as hashes, one vote per person (uniqueOn), server-enforced permissions, RecordRoom real-time sync. Copilot flagged that the generic presence route didn't check membership, so I cut presence to future work.
+- My additions: removing a roommate deletes their vote, creator can't join own invite, signed-out visitors sign in first, server-side permission tests.
+- Copilot ran lint, type-check, 22-23 unit tests, build, and e2e (11 passed, 4 skipped: no test accounts).
+- Bug found by my manual two-account test: a valid invite link showed "Listing not found." Automated tests had skipped the real two-account case. Reported with steps + logs; Copilot fixed it and added a test.
+- Manually tested with two Google accounts side by side: invite join, collaborator read-only, live vote updates without refresh, "Go for it" / "Pass" decisions, remove roommate deletes their vote and revokes access.
+- Found: saving a vote with an empty "optional" comment fails and shows a raw error code. Queued for fix.

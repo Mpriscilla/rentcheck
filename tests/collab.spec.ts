@@ -62,6 +62,73 @@ test('each browser renders its own signed-in account', async ({ users }) => {
   }
 })
 
+test('invitees join, vote changes sync live, and removal deletes their vote', async ({ users, page }) => {
+  const [creator, roommate] = await users(2)
+  const title = `__test-${Date.now()}__ Shared rental`
+  let listingId: string | null = null
+
+  try {
+    await creator.page.goto('/listings/new')
+    await creator.page.locator('#listing-title').fill(title)
+    await creator.page.locator('#listing-text').fill('A bright apartment with two bedrooms.')
+    await creator.page.getByRole('button', { name: 'Save listing' }).click()
+    await expect(creator.page.getByRole('heading', { name: title })).toBeVisible()
+
+    listingId = new URL(creator.page.url()).pathname.split('/').at(-1) ?? null
+    expect(listingId).toBeTruthy()
+
+    await creator.page.getByRole('button', { name: 'Create invite link' }).click()
+    const firstInvite = creator.page.getByTestId('invite-url')
+    await expect(firstInvite).toBeVisible()
+    const revokedUrl = await firstInvite.inputValue()
+    await creator.page.getByRole('button', { name: 'Turn off link' }).click()
+
+    await roommate.page.goto(revokedUrl)
+    await expect(roommate.page.getByRole('heading', { name: 'Listing not found' })).toBeVisible()
+
+    await creator.page.getByRole('button', { name: 'Create invite link' }).click()
+    const inviteUrl = await creator.page.getByTestId('invite-url').inputValue()
+    await page.goto(inviteUrl)
+    await expect(page.getByRole('heading', { name: 'Sign in to continue' })).toBeVisible()
+
+    await roommate.page.goto(inviteUrl)
+    await expect(roommate.page.getByRole('heading', { name: title })).toBeVisible()
+    await expect(creator.page.getByText(roommate.name, { exact: false })).toBeVisible()
+
+    await expect(roommate.page.getByRole('link', { name: 'Edit listing' })).toHaveCount(0)
+    await expect(roommate.page.getByRole('button', { name: 'Delete listing' })).toHaveCount(0)
+    await expect(roommate.page.getByRole('button', { name: /summarize|regenerate/i })).toHaveCount(0)
+    await expect(roommate.page.getByRole('button', { name: /invite/i })).toHaveCount(0)
+
+    await creator.page.getByTestId('vote-choice').selectOption('Good fit')
+    await creator.page.getByRole('button', { name: 'Save my vote' }).click()
+    await roommate.page.getByTestId('vote-choice').selectOption('Good fit')
+    await roommate.page.getByRole('button', { name: 'Save my vote' }).click()
+    await expect(creator.page.getByTestId('listing-decision')).toHaveText('Go for it')
+
+    await roommate.page.getByTestId('vote-choice').selectOption('Reject')
+    await roommate.page.getByTestId('vote-comment').fill('Too noisy at night')
+    await roommate.page.getByRole('button', { name: 'Update my vote' }).click()
+    await expect(creator.page.getByTestId('listing-decision')).toHaveText('Pass')
+    await expect(creator.page.getByText('Too noisy at night')).toBeVisible()
+
+    await creator.page.getByRole('button', { name: `Remove ${roommate.name}` }).click()
+    await expect(roommate.page.getByRole('heading', { name: 'Listing not found' })).toBeVisible()
+    await expect(creator.page.getByTestId('listing-decision')).toHaveText('Go for it')
+    await expect(creator.page.getByText('Too noisy at night')).toHaveCount(0)
+  } finally {
+    if (listingId) {
+      await creator.page.goto(`/listings/${listingId}`)
+      const deleteButton = creator.page.getByRole('button', { name: 'Delete listing', exact: true })
+      if (await deleteButton.isVisible().catch(() => false)) {
+        await deleteButton.click()
+        const dialog = creator.page.getByRole('dialog', { name: 'Delete this listing?' })
+        await dialog.getByRole('button', { name: 'Delete listing' }).click()
+      }
+    }
+  }
+})
+
 test('API status page renders loading success and error states', async ({ users }) => {
   const [user] = await users(1)
   let shouldFail = false
