@@ -8,6 +8,7 @@ export const listingsSchema: CollectionSchema = {
     { name: 'rentAmount', storage: 'number', interpretation: { kind: 'currency', symbol: '$', decimals: 2 } },
     { name: 'address', storage: 'text', interpretation: 'plain' },
     { name: 'collaborators', storage: 'text', interpretation: { kind: 'json' }, required: true },
+    { name: 'aiSummary', storage: 'text', interpretation: { kind: 'json' } },
   ],
   collaboratorsField: 'collaborators',
   permissions: {

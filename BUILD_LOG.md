@@ -34,3 +34,17 @@
   - My hypothesis: file-based routing made the detail page a layout for the edit page
   - Copilot found the same cause and flattened the edit route. Retested: pass
 - Delete with confirmation pop-up: pass
+
+## Step 6: More testing
+- Local 404 on /listings in my normal Chrome window, while incognito and the live site worked with the same commit. In DevTools Network, the router bundle was served from memory cache: an old copy from before the listings routes existed. Fixed with "Disable cache" + hard reload.
+- Permissions: signed in as a second Google account. The list showed "No listings yet," and opening my listing's direct URL showed "Listing not found." The server blocks access, not just the UI.
+
+
+## Step 7: AI summary (Copilot + DeepSpace AI)
+- Asked Copilot for a plan first. It chose DeepSpace's server-side createDeepSpaceAI so no keys reach the browser.
+- My additions: friendly error if credits/AI fail, treat listing text as untrusted data, keep output small, prevent double-clicks.
+- Summary is saved on the listing (no regeneration on refresh) and cleared when the listing is edited.
+- Bug 1: "Summarize" showed the friendly error, but the server log hid the cause. Asked Copilot to log the real error server-side only.
+- Bug 2: real error was "Unterminated string in JSON at position 615." The output token limit was too low (from my "keep it cheap" instruction), so the AI's answer was cut off. Fixed by raising the limit and capping list lengths.
+- Tested: structured summary, flags cash deposit and non-refundable fee, no invented facts, legal note, persists on refresh, clears on edit, stranger still blocked.
+- Note: AI used only the listing text ($1,850) even when the rent field said $1,900. It doesn't guess.

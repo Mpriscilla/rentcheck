@@ -4,6 +4,7 @@ import { useMutations } from 'deepspace'
 import { ArrowLeft } from 'lucide-react'
 import { Button, Input, Label, Textarea } from '@/components/ui'
 import { validateListingFields } from '@/lib/listings'
+import type { ListingSummary } from '@/lib/listing-summary'
 
 export interface ListingFormData {
   title: string
@@ -11,6 +12,7 @@ export interface ListingFormData {
   rentAmount?: number | null
   address?: string
   collaborators: string[]
+  aiSummary?: ListingSummary | null
 }
 
 interface ListingFormProps {
@@ -49,6 +51,7 @@ export default function ListingForm({ initialData, listingId }: ListingFormProps
     if (listingId) {
       data.rentAmount = rentAmount.trim() ? Number(rentAmount) : null
       data.address = address.trim()
+      data.aiSummary = null
     } else {
       if (rentAmount.trim()) data.rentAmount = Number(rentAmount)
       if (address.trim()) data.address = address.trim()
